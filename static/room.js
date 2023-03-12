@@ -27,7 +27,7 @@ let chatSocket = null;
 
 function connect() {
   chatSocket = new WebSocket(
-    "ws://" + window.location.host + "/ws/chat/" + roomId + "/",
+    "ws://" + window.location.host+":8001/" + "ws/chat/" + roomId + "/",
   );
 
   chatSocket.onopen = function (e) {
