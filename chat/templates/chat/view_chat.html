@@ -1,0 +1,149 @@
+{% extends 'chat/base.html' %} {% load static %} {% block content %}
+<style>
+  body {
+    background-color: #74ebd5;
+    background-image: linear-gradient(90deg, #0011 0%, #0000 100%);
+
+    min-height: 100vh;
+
+    overflow-x: hidden; /* Hide horizontal scrollbar */
+  }
+
+  ::-webkit-scrollbar {
+    width: 5px;
+  }
+
+  ::-webkit-scrollbar-track {
+    width: 5px;
+    background: #f5f5f5;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    width: 1em;
+    background-color: #ddd;
+    outline: 1px solid slategrey;
+    border-radius: 1rem;
+  }
+
+  .text-small {
+    font-size: 0.9rem;
+  }
+
+  .messages-box,
+  .chat-box {
+    height: 510px;
+    overflow-y: scroll;
+  }
+
+  .rounded-lg {
+    border-radius: 0.5rem;
+  }
+
+  input::placeholder {
+    font-size: 0.9rem;
+    color: #999;
+  }
+</style>
+
+<body>
+  <!-- Chat Box -->
+  <div class="container py-5 px-4">
+    <div class="col-12 px-0">
+      <div class="bg-gray px-4 py-2 bg-light">
+        <div class="row">
+        <div class="col-6 text-start">
+          <p class="h5 mb-0 py-1 text-dark">{{ room.chat_name }}</p>
+        </div>
+        {% if not room.description == 'Private'%}
+        <div class="col-6 text-end">
+          <a role="button" href="{% url 'add-users' room.id %}" class="h5 p-2 btn btn-dark btn-small text-small">Add members</a>
+        </div>
+
+        {%endif%}
+        <div>
+
+      </div>
+      <div id="chatLog" class="px-4 py-5 chat-box bg-white">
+        {% for msg in room_messages.all %}
+      {% if msg.user == current_user %}
+        <div class="media w-100 ml-auto mb-3 d-flex flex-row-reverse">
+          <div class="media-body text-end">
+            <div class="bg-dark rounded py-2 px-3 mb-2">
+              {% if '@' in msg.content %}
+              <div  onclick ="if (confirm('Do you want to delete this message?')){location.href='{% url 'deletemsg' msg.id room.id %}'}" class="bg-dark rounded py-2 px-3 mb-2" >
+                <p class="text-small mb-0 text-white">{{msg.content}}</p>
+              </div>
+              {% else %}
+
+              <div  onclick ="if (confirm('Do you want to delete this message?')){location.href='{% url 'deletemsg' msg.id room.id %}'}" class="bg-dark rounded py-2 px-3 mb-2" >
+                <p class="text-small mb-0 text-white">{{msg.content}}</p>
+              </div>
+              {% endif %}
+            </div>
+            <p class="small text-muted">{{ msg.created_at|date:'M j Y H:i' }}</p>
+          </div>
+        </div>
+      {% else %}
+        <div class="media w-100 mb-3 d-flex flex-row">
+          <div class="media-body ml-3 text-start">
+            <div class="bg-light rounded py-2 px-3 mb-2">
+              <p class="text-small fw-bold text-black">{{ msg.user }}</p>
+              {% if '@' in msg.content %}
+                <p class="text-small mb-0 text-danger">{{ msg.content }}</p>
+              {% else %}
+                <p class="text-small mb-0 text-muted text-black">{{ msg.content }}</p>
+              {% endif %}
+            </div>
+            <p class="small text-muted">{{ msg.created_at|date:'M j Y H:i' }}</p>
+          </div>
+        </div>
+      {% endif %}
+    {% endfor %}
+
+        <!-- End chatbox -->
+      </div>
+
+          <!-- Typing area -->
+          <form action="#" class="bg-light">
+            <div class="input-group">
+              <input
+                type="text"
+                class="form-control"
+                id="chatMessageInput"
+                placeholder="Enter your chat message"
+              />
+              <div class="input-group-append">
+                <button
+                  class="btn btn-light text-bg-dark"
+                  id="chatMessageSend"
+                  type="button"
+                >
+                  Send
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      {{ room.id|json_script:"roomId" }}
+      {{ current_user.username|json_script:"currentUser" }}
+      </div>
+
+
+      {% if not room.description == 'Private'%}
+        <div class="container text-center bg-gray px-4 py-2 bg-light mt-3">
+            <div class="card-header text-black ">
+              <h4> Members </h4>
+            </div>
+          <div class="row row-cols-lg-4 row-cols-sm-2 p-2  bg-white">
+          {%for user in room.chat_member.all%}
+            <div class="col text-black border"> <h5> {{ user }} </h5></div>
+          {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+      <script src="{% static 'room.js' %}"></script>
+      <script type="text/javascript"> var urlDelete = "{% url 'deletemsg' '1' room.id %}" </script>
+    </div>
+  </div>
+</body>
+{% endblock %}
